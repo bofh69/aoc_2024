@@ -24,21 +24,21 @@ pub fn input_generator(input: &str) -> Vec<InputType> {
 fn is_increasing(report: &[SolutionType]) -> bool {
     for i in 1..report.len() {
         let diff = report[i] - report[i - 1];
-        if diff < 1 || diff > 3 {
+        if !(1..=3).contains(&diff) {
             return false;
         }
     }
-    return true;
+    true
 }
 
 fn is_decreasing(report: &[SolutionType]) -> bool {
     for i in 1..report.len() {
         let diff = report[i - 1] - report[i];
-        if diff < 1 || diff > 3 {
+        if !(1..=3).contains(&diff) {
             return false;
         }
     }
-    return true;
+    true
 }
 
 #[aoc(day2, part1)]
@@ -60,12 +60,12 @@ fn is_increasing2(report: &[SolutionType], skip: usize) -> bool {
             continue;
         }
         let diff = report[i] - report[last];
-        if diff < 1 || diff > 3 {
+        if !(1..=3).contains(&diff) {
             return false;
         }
         last = i;
     }
-    return true;
+    true
 }
 
 fn is_decreasing2(report: &[SolutionType], skip: usize) -> bool {
@@ -78,12 +78,12 @@ fn is_decreasing2(report: &[SolutionType], skip: usize) -> bool {
             continue;
         }
         let diff = report[last] - report[i];
-        if diff < 1 || diff > 3 {
+        if !(1..=3).contains(&diff) {
             return false;
         }
         last = i;
     }
-    return true;
+    true
 }
 
 #[aoc(day2, part2)]
