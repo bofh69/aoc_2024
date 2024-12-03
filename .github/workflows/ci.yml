@@ -16,7 +16,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - name: Create missing input
-              run: mkdir -p input/2023; seq 1 25 | while read day; do touch input/2023/day$day.txt; done
+              run: mkdir -p input/2024; seq 1 25 | while read day; do touch input/2024/day$day.txt; done
             - name: cargo check
               run: cargo check
 
@@ -26,6 +26,6 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - name: Create missing input
-              run: mkdir -p input/2023; seq 1 25 | while read day; do touch input/2023/day$day.txt; done
+              run: mkdir -p input/2024; seq 1 25 | while read day; do touch input/2024/day$day.txt; done
             - name: cargo test
               run: cargo test
