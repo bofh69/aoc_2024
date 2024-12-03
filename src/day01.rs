@@ -4,7 +4,6 @@
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
-use rayon::prelude::*;
 use std::collections::HashMap;
 use std::str::FromStr;
 
@@ -45,11 +44,11 @@ pub fn solve_part2(data: &[InputType]) -> SolutionType {
             .and_modify(|counter| *counter += 1)
             .or_insert(1);
     }
-    data.par_iter().map(|(a, _b)| a).fold(|| 0, |count, number| {
+    data.iter().map(|(a, _b)| a).fold(0, |count, number| {
         if let Some(right_count) = right_count.get(number) {
             count + number * right_count
         } else {
             count
         }
-    }).reduce(|| 0, |acc, n| acc + n)
+    })
 }
