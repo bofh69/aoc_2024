@@ -7,8 +7,9 @@ use aoc_runner_derive::{aoc, aoc_generator};
 use std::collections::HashSet;
 use std::str::FromStr;
 
-type InputType = (HashSet<(u32, u32)>, Vec<Vec<u32>>);
-type SolutionType = u32;
+type NumType = u32;
+type InputType = (HashSet<(NumType, NumType)>, Vec<Vec<NumType>>);
+type SolutionType = NumType;
 
 #[aoc_generator(day5)]
 pub fn input_generator(input: &str) -> InputType {
@@ -19,17 +20,20 @@ pub fn input_generator(input: &str) -> InputType {
         if line.is_empty() {
             break;
         }
-        let mut line = line.split("|").map(|s| u32::from_str(s).unwrap());
+        let mut line = line.split("|").map(|s| NumType::from_str(s).unwrap());
         result1.insert((line.next().unwrap(), line.next().unwrap()));
     }
     for line in iter {
-        let line: Vec<_> = line.split(",").map(|s| u32::from_str(s).unwrap()).collect();
+        let line: Vec<_> = line
+            .split(",")
+            .map(|s| NumType::from_str(s).unwrap())
+            .collect();
         result2.push(line);
     }
     (result1, result2)
 }
 
-fn is_in_order(order: &HashSet<(u32, u32)>, update: &[u32]) -> bool {
+fn is_in_order(order: &HashSet<(NumType, NumType)>, update: &[NumType]) -> bool {
     for i in 0..update.len() {
         let first = update[i];
         for &second in update.iter().skip(i) {
@@ -53,7 +57,7 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
         .sum()
 }
 
-fn is_path(order: &HashSet<(u32, u32)>, a: u32, b: u32) -> bool {
+fn is_path(order: &HashSet<(NumType, NumType)>, a: NumType, b: NumType) -> bool {
     if order.contains(&(a, b)) {
         return true;
     }
@@ -87,7 +91,7 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
                 }
             });
             let middle = update.len() / 2;
-            update[middle]
+            update[middle] as SolutionType
         })
         .sum()
 }
