@@ -54,8 +54,7 @@ pub fn solve_part1(map: &Map) -> SolutionType {
     count
 }
 
-fn does_loop(map: &Map, pos: Point) -> bool {
-    let mut map = map.clone();
+fn does_loop(map: &mut Map, pos: Point) -> bool {
     map.set_at(pos, b'O');
 
     let pos = map.find(b'^');
@@ -93,11 +92,21 @@ fn does_loop(map: &Map, pos: Point) -> bool {
 
 #[aoc(day6, part2)]
 pub fn solve_part2(map: &Map) -> SolutionType {
+    let mut original_map = map.clone();
+    does_loop(&mut original_map, Point { x: 0, y: 0 });
+
     let mut count = 0;
     for y in 1..map.get_height() - 1 {
         for x in 1..map.get_width() - 1 {
-            if does_loop(map, Point { x, y }) {
-                count += 1
+            let pos = Point { x, y };
+            match original_map.get_at_unchecked(pos) {
+                b'^' | b'v' | b'<' | b'>' => {
+                    let mut map = map.clone();
+                    if does_loop(&mut map, pos) {
+                        count += 1
+                    }
+                }
+                _ => (),
             }
         }
     }
