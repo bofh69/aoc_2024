@@ -7,6 +7,7 @@ use aoc_runner_derive::{aoc, aoc_generator};
 use std::collections::HashSet;
 
 use advent_of_tools::*;
+use rayon::prelude::*;
 
 type SolutionType = i32;
 
@@ -95,20 +96,23 @@ pub fn solve_part2(map: &Map) -> SolutionType {
     let mut original_map = map.clone();
     does_loop(&mut original_map, Point { x: 0, y: 0 });
 
-    let mut count = 0;
-    for y in 1..map.get_height() - 1 {
-        for x in 1..map.get_width() - 1 {
-            let pos = Point { x, y };
-            match original_map.get_at_unchecked(pos) {
-                b'^' | b'v' | b'<' | b'>' => {
-                    let mut map = map.clone();
-                    if does_loop(&mut map, pos) {
-                        count += 1
+    (1..map.get_height() - 1)
+        .into_par_iter()
+        .map(|y| {
+            let mut count = 0;
+            for x in 1..map.get_width() - 1 {
+                let pos = Point { x, y };
+                match original_map.get_at_unchecked(pos) {
+                    b'^' | b'v' | b'<' | b'>' => {
+                        let mut map = map.clone();
+                        if does_loop(&mut map, pos) {
+                            count += 1
+                        }
                     }
+                    _ => (),
                 }
-                _ => (),
             }
-        }
-    }
-    count
+            count
+        })
+        .sum()
 }
