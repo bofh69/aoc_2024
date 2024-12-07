@@ -62,6 +62,10 @@ fn solvable2(result: NumType, acc: NumType, nums: &[NumType]) -> bool {
     if nums.is_empty() {
         return acc == result;
     }
+    // Assumes no zeros in nums:
+    if acc > result {
+        return false;
+    }
 
     let n = nums[0];
     let nums = &nums[1..];
