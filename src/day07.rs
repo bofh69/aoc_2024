@@ -47,13 +47,10 @@ fn solvable(result: NumType, acc: NumType, nums: &[NumType]) -> bool {
 
 #[aoc(day7, part1)]
 pub fn solve_part1(data: &InputType) -> SolutionType {
-    let mut count = 0;
-    for &(result, ref nums) in data {
-        if solvable(result, nums[0], &nums[1..]) {
-            count += result;
-        }
-    }
-    count
+    data.iter()
+        .filter(|&(result, ref nums)| solvable(*result, nums[0], &nums[1..]))
+        .map(|&(result, _)| result)
+        .sum()
 }
 
 //////////////////////////////////////////
@@ -92,11 +89,8 @@ fn solvable2(result: NumType, acc: NumType, nums: &[NumType]) -> bool {
 
 #[aoc(day7, part2)]
 pub fn solve_part2(data: &InputType) -> SolutionType {
-    let mut count = 0;
-    for &(result, ref nums) in data {
-        if solvable2(result, nums[0], &nums[1..]) {
-            count += result;
-        }
-    }
-    count
+    data.iter()
+        .filter(|&(result, ref nums)| solvable2(*result, nums[0], &nums[1..]))
+        .map(|&(result, _)| result)
+        .sum()
 }
