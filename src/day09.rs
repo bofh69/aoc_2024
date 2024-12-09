@@ -79,5 +79,46 @@ pub fn solve_part1(data: &str) -> SolutionType {
 
 #[aoc(day9, part2)]
 pub fn solve_part2(data: &str) -> SolutionType {
-    data.len() as SolutionType
+    let mut used = std::collections::VecDeque::new();
+    let mut free = std::collections::VecDeque::new();
+    let mut is_file = true;
+    let mut file_nr: u16 = 0;
+    let mut block_nr: u32 = 0;
+    for c in data.chars() {
+        let c = c as u8 - b'0';
+
+        if c > 0 {
+            if is_file {
+                used.push_back((block_nr, file_nr, c));
+                file_nr += 1;
+            } else {
+                free.push_back((block_nr, c));
+            }
+        }
+        block_nr += c as u32;
+        is_file = !is_file;
+    }
+
+    let mut checksum: SolutionType = 0;
+    'next: while let Some((file_block, file_nr, len)) = used.pop_back() {
+        for i in 0..free.len() {
+            let free_space = free.get_mut(i).unwrap();
+            if free_space.0 < file_block && free_space.1 >= len {
+                for j in 0..len {
+                    checksum += (file_nr as u64 * (free_space.0 as u64 + j as u64)) as SolutionType;
+                }
+                *free_space = (free_space.0 + len as u32, free_space.1 - len);
+                continue 'next;
+            } else if free_space.0 >= file_block {
+                for j in 0..len {
+                    checksum += (file_nr as u64 * (file_block as u64 + j as u64)) as SolutionType;
+                }
+                continue 'next;
+            }
+        }
+        for j in 0..len {
+            checksum += (file_nr as u64 * (file_block as u64 + j as u64)) as SolutionType;
+        }
+    }
+    checksum
 }
