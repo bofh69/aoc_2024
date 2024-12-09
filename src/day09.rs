@@ -99,15 +99,21 @@ pub fn solve_part2(data: &str) -> SolutionType {
         is_file = !is_file;
     }
 
+    let mut first_idx = [0usize; 10];
+
     let mut checksum: SolutionType = 0;
     'next: while let Some((file_block, file_nr, len)) = used.pop_back() {
-        for i in 0..free.len() {
+        for i in first_idx[len as usize]..free.len() {
             let free_space = free.get_mut(i).unwrap();
             if free_space.0 < file_block && free_space.1 >= len {
                 for j in 0..len {
                     checksum += (file_nr as u64 * (free_space.0 as u64 + j as u64)) as SolutionType;
                 }
+                first_idx[len as usize] = i;
                 *free_space = (free_space.0 + len as u32, free_space.1 - len);
+                if (free_space.0 as usize) < first_idx[free_space.1 as usize] {
+                    first_idx[free_space.1 as usize] = i;
+                }
                 continue 'next;
             } else if free_space.0 >= file_block {
                 for j in 0..len {
@@ -116,6 +122,7 @@ pub fn solve_part2(data: &str) -> SolutionType {
                 continue 'next;
             }
         }
+        first_idx[len as usize] = usize::MAX;
         for j in 0..len {
             checksum += (file_nr as u64 * (file_block as u64 + j as u64)) as SolutionType;
         }
