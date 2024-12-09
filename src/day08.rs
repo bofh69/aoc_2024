@@ -15,6 +15,7 @@ pub fn input_generator(input: &str) -> Map {
     Map::from_string(input)
 }
 
+/*
 fn print_map(map: &Map, antinodes: &HashSet<Point>) {
     map.print_with_overlay(|pos, c| {
         if c == b'.' && antinodes.contains(&pos) {
@@ -24,6 +25,7 @@ fn print_map(map: &Map, antinodes: &HashSet<Point>) {
         }
     });
 }
+*/
 
 #[aoc(day8, part1)]
 pub fn solve_part1(map: &Map) -> SolutionType {
@@ -46,7 +48,7 @@ pub fn solve_part1(map: &Map) -> SolutionType {
             }
         }
     }
-    print_map(map, &antinodes);
+    // print_map(map, &antinodes);
     antinodes.len() as SolutionType
 }
 
