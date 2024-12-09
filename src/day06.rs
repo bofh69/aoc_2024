@@ -69,11 +69,6 @@ fn does_loop(map: &mut Map, pos: Point) -> bool {
 
     loop {
         let new_pos = pos.walk(dir);
-        if visited.contains(&(pos, dir)) {
-            // map.print();
-            return true;
-        }
-        visited.insert((pos, dir));
         // println!("{:?}", pos);
         // map.print();
         match map.get_at_unchecked(new_pos) {
@@ -82,7 +77,14 @@ fn does_loop(map: &mut Map, pos: Point) -> bool {
                 map.set_at(pos, legend);
                 pos = new_pos;
             }
-            b'O' | b'#' => dir = dir.turn_cardinal_right(),
+            b'O' | b'#' => {
+                if visited.contains(&(pos, dir)) {
+                    // map.print();
+                    return true;
+                }
+                visited.insert((pos, dir));
+                dir = dir.turn_cardinal_right();
+            }
             _ => {
                 break;
             }
