@@ -40,6 +40,8 @@ fn count_(mem: &mut HashMap<(InputType, u8), SolutionType>, n: InputType, gen: u
             num /= 10;
             digits += 1;
         }
+        let digits2 = n.ilog(10);
+        assert_eq!(digits, digits2);
         if digits % 2 == 0 {
             // Even numbers
             let mut first = n;
