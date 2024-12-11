@@ -5,7 +5,6 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 
 use ahash::{HashMap, HashMapExt};
-use memoize::memoize;
 use std::str::FromStr;
 
 type InputType = SolutionType;
@@ -19,33 +18,45 @@ pub fn input_generator(input: &str) -> Vec<InputType> {
         .collect()
 }
 
-#[aoc(day11, part1)]
-pub fn solve_part1(data: &[InputType]) -> SolutionType {
-    data.iter().map(|n| count(*n, 25)).sum()
+fn get_digits(n: InputType) -> u32 {
+    SolutionType::ilog10(n) + 1
 }
 
-#[memoize(CustomHasher: HashMap)]
-fn count(n: InputType, gen: u8) -> SolutionType {
-    if gen == 0 {
-        return 1;
+fn count(data: &[InputType], blinks: u8) -> SolutionType {
+    let mut curr: HashMap<SolutionType, SolutionType> = HashMap::new();
+    for &stone in data {
+        *curr.entry(stone).or_insert(0) += 1;
     }
-
-    if n == 0 {
-        count(1, gen - 1)
-    } else {
-        let digits = n.ilog10() + 1;
-        if digits % 2 == 0 {
-            let pow = (10 as SolutionType).pow(digits / 2);
-            let first = n / pow;
-            let second = n % pow;
-            count(first, gen - 1) + count(second, gen - 1)
-        } else {
-            count(n * 2024, gen - 1)
+    let mut next = HashMap::new();
+    for _blink in 0..blinks {
+        for (&stone, &n_stones) in &curr {
+            if stone == 0 {
+                *next.entry(1).or_insert(0) += n_stones;
+            } else {
+                let digits = get_digits(stone);
+                if digits % 2 == 0 {
+                    let pow = (10 as SolutionType).pow(digits / 2);
+                    let first = stone / pow;
+                    let second = stone % pow;
+                    *next.entry(first).or_insert(0) += n_stones;
+                    *next.entry(second).or_insert(0) += n_stones;
+                } else {
+                    *next.entry(stone * 2024).or_insert(0) += n_stones;
+                }
+            }
         }
+        (curr, next) = (next, curr);
+        next.clear();
     }
+    curr.values().map(|v| *v as SolutionType).sum()
+}
+
+#[aoc(day11, part1)]
+pub fn solve_part1(data: &[InputType]) -> SolutionType {
+    count(data, 25)
 }
 
 #[aoc(day11, part2)]
 pub fn solve_part2(data: &[InputType]) -> SolutionType {
-    data.iter().map(|n| count(*n, 75)).sum()
+    count(data, 75)
 }
