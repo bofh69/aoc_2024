@@ -21,3 +21,4 @@ regex = "1.4.2"
 sscanf = "0.4.0"
 advent_of_tools = {git = "https://github.com/bofh69/advent_of_tools.git"}
 memoize = "0.4.2"
+ahash = "0.8.11"

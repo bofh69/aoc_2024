@@ -4,6 +4,7 @@
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
+use ahash::{HashMap, HashMapExt};
 use memoize::memoize;
 use std::str::FromStr;
 
@@ -23,7 +24,7 @@ pub fn solve_part1(data: &[InputType]) -> SolutionType {
     data.iter().map(|n| count(*n, 25)).sum()
 }
 
-#[memoize]
+#[memoize(CustomHasher: HashMap)]
 fn count(n: InputType, gen: u8) -> SolutionType {
     if gen == 0 {
         return 1;
