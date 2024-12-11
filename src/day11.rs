@@ -34,26 +34,11 @@ fn count_(mem: &mut HashMap<(InputType, u8), SolutionType>, n: InputType, gen: u
     let res = if n == 0 {
         count_(mem, 1, gen - 1)
     } else {
-        let mut digits = 1;
-        let mut num = n;
-        while num >= 10 {
-            num /= 10;
-            digits += 1;
-        }
-        let digits2 = n.ilog(10);
-        assert_eq!(digits, digits2);
+        let digits = n.ilog10() + 1;
         if digits % 2 == 0 {
-            // Even numbers
-            let mut first = n;
-            let mut second = 0;
-            let mut fac = 1;
-            digits /= 2;
-            while digits > 0 {
-                second += (first % 10) * fac;
-                first /= 10;
-                fac *= 10;
-                digits -= 1;
-            }
+            let pow = (10 as SolutionType).pow(digits / 2);
+            let first = n / pow;
+            let second = n % pow;
             count_(mem, first, gen - 1) + count_(mem, second, gen - 1)
         } else {
             count_(mem, n * 2024, gen - 1)
