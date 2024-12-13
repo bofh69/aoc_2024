@@ -19,3 +19,7 @@ Cargo.lock
 
 # Input data. Get it from https://adventofcode.com/2023
 input
+
+# AOC tiles:
+.aoc_tiles/*
+!.aoc_tiles/tiles
