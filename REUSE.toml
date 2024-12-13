@@ -1,0 +1,10 @@
+version = 1
+SPDX-PackageName = "Advent of Code 2024"
+SPDX-PackageSupplier = "Sebastian Andersson <sebastian@bittr.nu>"
+SPDX-PackageDownloadLocation = "https://github.com/bofh69/aoc_2024"
+
+[[annotations]]
+path = ".aoc_tiles/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "LiquidFun, https://github.com/LiquidFun/aoc_tiles"
+SPDX-License-Identifier = "Apache-2.0"
