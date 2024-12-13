@@ -3,8 +3,10 @@ Upstream-Name: Advent of Code 2024
 Upstream-Contact: Sebastian Andersson <sebastian@bittr.nu>
 Source: https://github.com/bofh69/aoc_2024
 
-# Sample paragraph, commented out:
-#
-# Files: src/*
-# Copyright: $YEAR $NAME <$CONTACT>
-# License: ...
+Files: .aoc_tiles/**
+Copyright: LiquidFun, https://github.com/LiquidFun/aoc_tiles
+License: Apache-2.0
+
+Files: .pre-commit-config.yaml
+Copyright: LiquidFun, https://github.com/LiquidFun/aoc_tiles
+License: Apache-2.0

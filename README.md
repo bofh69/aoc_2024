@@ -53,5 +53,3 @@ SPDX-License-Identifier: GPL-3.0-or-later
   <img src=".aoc_tiles/tiles/2024/13.png" width="161px">
 </a>
 <!-- AOC TILES END -->
-
-[Advent of Code 2024](https://www.adventofcode.com/2024/)
