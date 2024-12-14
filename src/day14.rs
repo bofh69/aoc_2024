@@ -5,14 +5,15 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 
 use advent_of_tools::*;
-use std::collections::HashSet;
+use ahash::{HashSet, HashSetExt};
 use std::str::FromStr;
 
-type InputType = (Point<SolutionType>, Point<SolutionType>);
+type PointType = i16;
+type InputType = (Point<PointType>, Point<PointType>);
 type SolutionType = i64;
 
-const WIDTH: SolutionType = 101;
-const HEIGHT: SolutionType = 103;
+const WIDTH: PointType = 101;
+const HEIGHT: PointType = 103;
 
 #[aoc_generator(day14)]
 pub fn input_generator(input: &str) -> Vec<InputType> {
@@ -29,7 +30,7 @@ pub fn input_generator(input: &str) -> Vec<InputType> {
             .next()
             .unwrap()
             .split(",")
-            .map(|s| SolutionType::from_str(s).unwrap());
+            .map(|s| PointType::from_str(s).unwrap());
         let pos = Point {
             x: pitr.next().unwrap(),
             y: pitr.next().unwrap(),
@@ -39,7 +40,7 @@ pub fn input_generator(input: &str) -> Vec<InputType> {
             .next()
             .unwrap()
             .split(",")
-            .map(|s| SolutionType::from_str(s).unwrap());
+            .map(|s| PointType::from_str(s).unwrap());
         let vel = Point {
             x: vitr.next().unwrap(),
             y: vitr.next().unwrap(),
@@ -84,55 +85,21 @@ pub fn solve_part1(data: &[InputType]) -> SolutionType {
     quads[1] * quads[2] * quads[3] * quads[4]
 }
 
-fn count_quality(robots: &[InputType]) -> u32 {
-    let pos: HashSet<_> = robots.iter().map(|robot| robot.0).collect();
+//////////////////////
 
-    let mut count = 0;
-    for robot in robots {
-        if pos.contains(&Point {
-            x: robot.0.x - 1,
-            y: robot.0.y,
-        }) || pos.contains(&Point {
-            x: robot.0.x + 1,
-            y: robot.0.y,
-        }) || pos.contains(&Point {
-            x: robot.0.x,
-            y: robot.0.y - 1,
-        }) || pos.contains(&Point {
-            x: robot.0.x,
-            y: robot.0.y + 1,
-        }) {
-            count += 1;
-        }
-    }
-
-    count
-}
-
-#[aoc(day14, part2)]
-pub fn solve_part2(data: &[InputType]) -> SolutionType {
-    let mut robots = data.to_vec();
-    let mut max_quality = 0;
-    let mut at_gen = 0;
-    for gen in 1..=WIDTH * HEIGHT {
-        for robot in robots.iter_mut() {
-            robot.0.x = (robot.0.x + robot.1.x).rem_euclid(WIDTH);
-            robot.0.y = (robot.0.y + robot.1.y).rem_euclid(HEIGHT);
-        }
-        let quality = count_quality(&robots);
-        if quality > max_quality {
-            max_quality = quality;
-            at_gen = gen;
-        }
-    }
-
-    println!("Generation {at_gen}, quality: {max_quality}");
+#[allow(unused)]
+fn print_map(data: &[InputType], at_gen: SolutionType) {
+    println!("Generation {at_gen}");
     for y in 0..HEIGHT {
         for x in 0..WIDTH {
             let mut count = 0;
             for robot in data {
-                if (robot.0.x + robot.1.x * at_gen).rem_euclid(WIDTH) == x
-                    && (robot.0.y + robot.1.y * at_gen).rem_euclid(HEIGHT) == y
+                if (robot.0.x as SolutionType + robot.1.x as SolutionType * at_gen)
+                    .rem_euclid(WIDTH as SolutionType) as PointType
+                    == x
+                    && (robot.0.y as SolutionType + robot.1.y as SolutionType * at_gen)
+                        .rem_euclid(HEIGHT as SolutionType) as PointType
+                        == y
                 {
                     count += 1;
                 }
@@ -146,5 +113,108 @@ pub fn solve_part2(data: &[InputType]) -> SolutionType {
         println!();
     }
     println!();
+}
+
+fn count_quality(pos: &HashSet<Point<PointType>>) -> u32 {
+    let mut count = 0;
+    for robot in pos {
+        if pos.contains(&Point {
+            x: robot.x - 1,
+            y: robot.y,
+        }) {
+            count += 1;
+        }
+        if pos.contains(&Point {
+            x: robot.x + 1,
+            y: robot.y,
+        }) {
+            count += 1;
+        }
+        if pos.contains(&Point {
+            x: robot.x,
+            y: robot.y - 1,
+        }) {
+            count += 1;
+        }
+        if pos.contains(&Point {
+            x: robot.x,
+            y: robot.y + 1,
+        }) {
+            count += 1;
+        }
+        if pos.contains(&Point {
+            x: robot.x - 1,
+            y: robot.y - 1,
+        }) {
+            count += 1;
+        }
+        if pos.contains(&Point {
+            x: robot.x - 1,
+            y: robot.y + 1,
+        }) {
+            count += 1;
+        }
+        if pos.contains(&Point {
+            x: robot.x + 1,
+            y: robot.y - 1,
+        }) {
+            count += 1;
+        }
+        if pos.contains(&Point {
+            x: robot.x + 1,
+            y: robot.y + 1,
+        }) {
+            count += 1;
+        }
+    }
+
+    count
+}
+
+fn get_quality_at(
+    robots: &mut HashSet<Point<PointType>>,
+    data: &[InputType],
+    gen: SolutionType,
+) -> u32 {
+    robots.clear();
+    for robot in data {
+        robots.insert(Point::<PointType> {
+            x: (robot.0.x as SolutionType + robot.1.x as SolutionType * gen)
+                .rem_euclid(WIDTH as SolutionType) as PointType,
+            y: (robot.0.y as SolutionType + robot.1.y as SolutionType * gen)
+                .rem_euclid(HEIGHT as SolutionType) as PointType,
+        });
+    }
+    count_quality(robots)
+}
+
+#[aoc(day14, part2)]
+pub fn solve_part2(data: &[InputType]) -> SolutionType {
+    let mut max_quality = 0;
+    let mut at_gen = 0;
+    let mut pos = HashSet::new();
+    for gen in 0..WIDTH as SolutionType {
+        let quality = get_quality_at(&mut pos, data, gen);
+        if quality > max_quality {
+            max_quality = quality;
+            at_gen = gen;
+        }
+    }
+
+    max_quality = 0;
+    let mut gen = at_gen;
+    loop {
+        gen += WIDTH as SolutionType;
+        let quality = get_quality_at(&mut pos, data, gen);
+        if quality > max_quality {
+            max_quality = quality;
+            at_gen = gen;
+        }
+        if gen >= WIDTH as SolutionType * HEIGHT as SolutionType {
+            break;
+        }
+    }
+
+    print_map(data, at_gen);
     at_gen
 }
