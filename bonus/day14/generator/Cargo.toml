@@ -1,0 +1,9 @@
+[package]
+name = "generator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+advent_of_tools = {git = "https://github.com/bofh69/advent_of_tools.git"}
+pico-args = "0.5.0"
+rand = "0.8.5"
