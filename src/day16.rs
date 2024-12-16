@@ -326,6 +326,7 @@ pub fn solve_part2(map: &Map) -> SolutionType {
         */
     }
 
+    /*
     map.print_with_overlay(|p, c| {
         if winning_path.contains(&p) {
             Some(b'O')
@@ -333,6 +334,7 @@ pub fn solve_part2(map: &Map) -> SolutionType {
             Some(c)
         }
     });
+    */
 
     winning_path.len() as SolutionType + 1
 }

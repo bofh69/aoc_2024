@@ -83,11 +83,13 @@ pub fn solve_part1(first_map: &Map) -> SolutionType {
             if (c as char).is_ascii_alphabetic() {
                 let (area, perimeter) = flood_cardinal(&mut map, first_map, pos, c, b'*');
                 price += area * perimeter;
+                /*
                 println!(
                     "{}: area={area}, perimeter={perimeter}, price={}",
                     c as char,
                     area * perimeter
                 );
+                */
             }
         }
     }
@@ -157,11 +159,13 @@ pub fn solve_part2(first_map: &Map) -> SolutionType {
                 let (area, _perimeter) = flood_cardinal(&mut map, first_map, pos, b'!', b'*');
 
                 price += area * sides;
+                /*
                 println!(
                     "{}: area={area}, sides={sides}, price={}",
                     c as char,
                     area * sides
                 );
+                */
             }
         }
     }

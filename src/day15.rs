@@ -123,7 +123,7 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
             c => panic!("Unknown char ''{c}''"),
         }
     }
-    map.print_with_overlay(|p, c| if p == pos { Some(b'@') } else { Some(c) });
+    // map.print_with_overlay(|p, c| if p == pos { Some(b'@') } else { Some(c) });
     map.find(b'O').iter().map(|p| p.y * 100 + p.x).sum()
 }
 
@@ -260,6 +260,6 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
             c => panic!("Unknown char ''{c}''"),
         }
     }
-    map.print_with_overlay(|p, c| if p == pos { Some(b'@') } else { Some(c) });
+    // map.print_with_overlay(|p, c| if p == pos { Some(b'@') } else { Some(c) });
     map.find(b'[').iter().map(|p| p.y * 100 + p.x).sum()
 }
