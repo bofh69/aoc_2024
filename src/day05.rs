@@ -4,7 +4,7 @@
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
-use std::collections::HashSet;
+use ahash::{HashSet, HashSetExt};
 use std::str::FromStr;
 
 type NumType = u32;
