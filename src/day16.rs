@@ -17,7 +17,7 @@ pub fn input_generator(input: &str) -> Map {
     Map::from_string_with_border(input)
 }
 
-#[derive(Eq, PartialEq)]
+#[derive(Eq, PartialEq, Debug)]
 struct ReindeerPos {
     cost: SolutionType,
     pos: Point,
@@ -104,6 +104,7 @@ pub fn solve_part1(map: &Map) -> SolutionType {
     0
 }
 
+/*
 fn count_paths(
     map: &Map,
     pos: ReindeerPos,
@@ -171,34 +172,167 @@ fn count_paths(
 
     possible
 }
+*/
+
+/*
+struct Graph {
+    vert: Vec::<Point>,
+    edges: HashMap<u16, [u16; 4]>,
+}
+
+impl Graph {
+    const BLOCKED : u16 = u16::MAX;
+
+    fn from_map(map: &Map) -> Self {
+        let mut vert = Vec::new();
+        let mut edges = HashMap::new();
+        let mut n_v = 0;
+
+        let is_free = |c| matches!(c, b'S'|b'E'|b'.');
+
+        let is_node = |pos| {
+            let c = map.get_at_unchecked(pos);
+            if !is_free(c) {
+                return false;
+            }
+            if c == b'S' || c == b'E' {
+                return true;
+            }
+            let mut sum = 0;
+            use Dir::*;
+            for dir in [North, South, East, West] {
+                if is_free(map.get_at_unchecked(pos.walk(dir))) {
+                    sum += 1;
+                }
+            }
+            sum > 2
+        };
+
+        let mut vertecies : HashMap<_, _> = map.iter().filter(|(p, _c)| is_node(*p)).enumerate().collect();
+
+        Self {
+            vert,
+            edges
+        }
+    }
+}
+*/
 
 #[aoc(day16, part2)]
 pub fn solve_part2(map: &Map) -> SolutionType {
-    let max_cost = solve_part1(map);
     let start = map.find(b'S')[0];
+    let end = map.find(b'E')[0];
 
-    let mut points = HashSet::new();
     let mut visited = HashMap::new();
+    let mut to_expand = BTreeSet::new();
+    let mut to_expand_back = BTreeSet::new();
+    to_expand.insert(ReindeerPos {
+        pos: start,
+        dir: Dir::East,
+        cost: 0,
+    });
 
-    count_paths(
-        map,
-        ReindeerPos {
-            pos: start,
-            dir: Dir::East,
-            cost: 0,
-        },
-        max_cost,
-        &mut points,
-        &mut visited,
-    );
+    let mut max_cost = u32::MAX;
+
+    while let Some(pos) = to_expand.pop_first() {
+        if pos.cost > max_cost {
+            continue;
+        }
+        if pos.pos == end {
+            if pos.cost < max_cost {
+                max_cost = pos.cost;
+            }
+            visited.entry((pos.pos, pos.dir)).or_insert(pos.cost);
+            to_expand_back.insert(pos);
+            continue;
+        }
+        let old_cost = visited.entry((pos.pos, pos.dir)).or_insert(pos.cost);
+        if *old_cost < pos.cost {
+            continue;
+        }
+        to_expand.insert(ReindeerPos {
+            pos: pos.pos,
+            dir: pos.dir.turn_cardinal_left(),
+            cost: pos.cost + 1000,
+        });
+        to_expand.insert(ReindeerPos {
+            pos: pos.pos,
+            dir: pos.dir.turn_cardinal_right(),
+            cost: pos.cost + 1000,
+        });
+        let new_pos = pos.pos.walk(pos.dir);
+        let c = map.get_at_unchecked(new_pos);
+        if c == b'E' || c == b'.' {
+            to_expand.insert(ReindeerPos {
+                pos: new_pos,
+                dir: pos.dir,
+                cost: pos.cost + 1,
+            });
+        }
+        /*
+        map.print_with_overlay(|p, c| if p == pos.pos {
+            Some(b'@')
+        } else {
+            Some(c)
+        });
+        */
+    }
+
+    let mut winning_path = HashSet::new();
+
+    while let Some(pos) = to_expand_back.pop_last() {
+        if pos.pos == start {
+            continue;
+        }
+        let old_cost = visited.get(&(pos.pos, pos.dir));
+        if old_cost.is_none() {
+            continue;
+        }
+        let old_cost = old_cost.unwrap();
+
+        if *old_cost != pos.cost {
+            continue;
+        }
+
+        winning_path.insert(pos.pos);
+
+        to_expand_back.insert(ReindeerPos {
+            pos: pos.pos,
+            dir: pos.dir.turn_cardinal_left(),
+            cost: pos.cost - 1000,
+        });
+        to_expand_back.insert(ReindeerPos {
+            pos: pos.pos,
+            dir: pos.dir.turn_cardinal_right(),
+            cost: pos.cost - 1000,
+        });
+        let new_pos = pos
+            .pos
+            .walk(pos.dir.turn_cardinal_left().turn_cardinal_left());
+        let c = map.get_at_unchecked(new_pos);
+        if c == b'S' || c == b'.' {
+            to_expand_back.insert(ReindeerPos {
+                pos: new_pos,
+                dir: pos.dir,
+                cost: pos.cost - 1,
+            });
+        }
+        /*
+        map.print_with_overlay(|p, c| if p == pos.pos {
+            Some(b'@')
+        } else {
+            Some(c)
+        });
+        */
+    }
 
     map.print_with_overlay(|p, c| {
-        if points.contains(&p) {
+        if winning_path.contains(&p) {
             Some(b'O')
         } else {
             Some(c)
         }
     });
 
-    points.len() as SolutionType + 1
+    winning_path.len() as SolutionType + 1
 }
