@@ -4,8 +4,7 @@
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
-// use ahash::{HashMap, HashMapExt};
-use rand::prelude::*;
+use ahash::{HashSet, HashSetExt};
 use std::str::FromStr;
 
 type NumType = i64;
@@ -74,6 +73,8 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
     0
 }
 
+use memoize::*;
+#[memoize(Ignore: prog)]
 fn run_prog(mut a: NumType, mut b: NumType, mut c: NumType, prog: &[NumType]) -> Vec<NumType> {
     let mut isp = 0;
     let mut result = Vec::new();
@@ -133,6 +134,7 @@ fn run_prog(mut a: NumType, mut b: NumType, mut c: NumType, prog: &[NumType]) ->
     result
 }
 
+#[allow(unused)]
 fn disassemble(prog: &[NumType]) {
     let mut iter = prog.iter();
     let mut isp = 0;
@@ -178,17 +180,22 @@ fn disassemble(prog: &[NumType]) {
     }
 }
 
-fn run_prog2(mut a: NumType) -> Vec<NumType> {
-    let mut res = Vec::new();
-    loop {
-        let b = (a & 7) ^ 3;
-        let c = (a >> b) & 7;
-        let b = (a & 7) ^ 6;
-        a >>= 3;
-        let b = b ^ c;
-        res.push(b);
-        if a == 0 {
-            break;
+fn find_solutions(prog: &[NumType], output: &[NumType]) -> HashSet<NumType> {
+    if output.is_empty() {
+        let mut res = HashSet::new();
+        res.insert(0);
+        return res;
+    }
+    let old_solutions = find_solutions(prog, &output[1..]);
+    let mut res = HashSet::new();
+    for a in old_solutions {
+        let a = a << 3;
+        for i in 0..8 * 8 * 8 {
+            let a = a ^ i;
+            let new_output = run_prog(a, 0, 0, prog);
+            if new_output == output {
+                res.insert(a);
+            }
         }
     }
     res
@@ -196,63 +203,7 @@ fn run_prog2(mut a: NumType) -> Vec<NumType> {
 
 #[aoc(day17, part2)]
 pub fn solve_part2(data: &InputType) -> SolutionType {
-    disassemble(&data.prog);
+    // disassemble(&data.prog);
 
-    /*
-    for a in 0..8*8*8*8 {
-        println!("{:?}", run_prog2(a));
-    }
-    */
-
-    // One solution is 216549846240959. Should be smaller
-    // Ugly hack:
-    use rand::distributions::Uniform;
-    let mut rng = rand::thread_rng();
-    let dist_a = Uniform::from(0..216549846240959);
-
-    let mut a;
-    'all: loop {
-        a = dist_a.sample(&mut rng);
-        if a >= 216549846240959 {
-            continue;
-        }
-        'pos: for pos in 1..=data.prog.len() {
-            let pos = data.prog.len() - pos;
-            for x in 0..8 * 8 * 8 * 8 {
-                let tmp_a = a ^ (x << (pos * 3));
-                if tmp_a >= 216549846240959 {
-                    continue;
-                }
-                let res = run_prog(tmp_a, 0, 0, &data.prog);
-                if res.len() != data.prog.len() {
-                    continue;
-                }
-                if res[pos..] != data.prog[pos..] {
-                    continue;
-                }
-                a = tmp_a;
-                continue 'pos;
-            }
-            // println!("Didn't find for pos {pos}");
-            continue 'all;
-        }
-        if a < 216549846240959 {
-            break;
-        }
-    }
-
-    println!("PROG:\n{:?}", data.prog);
-
-    loop {
-        let res = run_prog2(a);
-        if data.prog == res {
-            break;
-        }
-        println!("{:?}", res);
-        a += 1 << (3 * 5);
-    }
-
-    println!("{:?}", run_prog(a, 0, 0, &data.prog));
-
-    a
+    *find_solutions(&data.prog, &data.prog).iter().min().unwrap()
 }
