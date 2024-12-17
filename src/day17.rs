@@ -5,6 +5,7 @@
 use aoc_runner_derive::{aoc, aoc_generator};
 
 // use ahash::{HashMap, HashMapExt};
+use rand::prelude::*;
 use std::str::FromStr;
 
 type NumType = i64;
@@ -132,26 +133,126 @@ fn run_prog(mut a: NumType, mut b: NumType, mut c: NumType, prog: &[NumType]) ->
     result
 }
 
+fn disassemble(prog: &[NumType]) {
+    let mut iter = prog.iter();
+    let mut isp = 0;
+    while let Some(inst) = iter.next() {
+        let &op = iter.next().unwrap();
+        print!("{isp:2}:");
+        isp += 2;
+        let decode = |op| match op {
+            0..=3 => format!("{op}"),
+            4 => "A".to_string(),
+            5 => "B".to_string(),
+            6 => "C".to_string(),
+            _ => panic!("Unkown operand"),
+        };
+
+        match inst {
+            0 => {
+                println!("ADV: A = A / (1 << {})", decode(op));
+            }
+            6 => {
+                println!("BDV: B = A / (1 << {})", decode(op));
+            }
+            7 => {
+                println!("CDV: C = A / (1 << {})", decode(op));
+            }
+            1 => {
+                println!("BXL: B = B ^ {op}");
+            }
+            2 => {
+                println!("BST: B = {} % 8", decode(op));
+            }
+            3 => {
+                println!("JNZ: ISP = {op}");
+            }
+            4 => {
+                println!("BXC: B = B ^ C");
+            }
+            5 => {
+                println!("OUT: out({} % 8)", decode(op));
+            }
+            _ => panic!("Unknown instruction"),
+        }
+    }
+}
+
+fn run_prog2(mut a: NumType) -> Vec<NumType> {
+    let mut res = Vec::new();
+    loop {
+        let b = (a & 7) ^ 3;
+        let c = (a >> b) & 7;
+        let b = (a & 7) ^ 6;
+        a >>= 3;
+        let b = b ^ c;
+        res.push(b);
+        if a == 0 {
+            break;
+        }
+    }
+    res
+}
+
 #[aoc(day17, part2)]
 pub fn solve_part2(data: &InputType) -> SolutionType {
-    for a in 1000000000..NumType::MAX {
-        let result = run_prog(a, 0, 0, &data.prog);
-        if result == data.prog {
-            return a;
-        }
-        /*
-        if result.len() < 3 {
+    disassemble(&data.prog);
+
+    /*
+    for a in 0..8*8*8*8 {
+        println!("{:?}", run_prog2(a));
+    }
+    */
+
+    // One solution is 216549846240959. Should be smaller
+    // Ugly hack:
+    use rand::distributions::Uniform;
+    let mut rng = rand::thread_rng();
+    let dist_a = Uniform::from(0..216549846240959);
+
+    let mut a;
+    'all: loop {
+        a = dist_a.sample(&mut rng);
+        if a >= 216549846240959 {
             continue;
         }
-        println!("A={a}: {} {} {} .. {} {} {}",
-            result[0],
-            result[1],
-            result[1],
-            data.prog[0],
-            data.prog[1],
-            data.prog[2],
-            );
-        */
+        'pos: for pos in 1..=data.prog.len() {
+            let pos = data.prog.len() - pos;
+            for x in 0..8 * 8 * 8 * 8 {
+                let tmp_a = a ^ (x << (pos * 3));
+                if tmp_a >= 216549846240959 {
+                    continue;
+                }
+                let res = run_prog(tmp_a, 0, 0, &data.prog);
+                if res.len() != data.prog.len() {
+                    continue;
+                }
+                if res[pos..] != data.prog[pos..] {
+                    continue;
+                }
+                a = tmp_a;
+                continue 'pos;
+            }
+            // println!("Didn't find for pos {pos}");
+            continue 'all;
+        }
+        if a < 216549846240959 {
+            break;
+        }
     }
-    0
+
+    println!("PROG:\n{:?}", data.prog);
+
+    loop {
+        let res = run_prog2(a);
+        if data.prog == res {
+            break;
+        }
+        println!("{:?}", res);
+        a += 1 << (3 * 5);
+    }
+
+    println!("{:?}", run_prog(a, 0, 0, &data.prog));
+
+    a
 }
