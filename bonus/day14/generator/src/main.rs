@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Sebastian Andersson
+//
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 use std::path::PathBuf;
 
 use advent_of_tools::*;

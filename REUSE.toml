@@ -8,3 +8,9 @@ path = ".aoc_tiles/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "LiquidFun, https://github.com/LiquidFun/aoc_tiles"
 SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "bonus/day14/generator/example*.txt"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Sebastian Andersson <sebastian@bittr.nu>"
+SPDX-License-Identifier = "CC0-1.0"

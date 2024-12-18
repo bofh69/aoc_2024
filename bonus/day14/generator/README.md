@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Sebastian Andersson
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 Day 14 generator
 
 Creates an input file for AoC Day 14, part 2 from two input files.
