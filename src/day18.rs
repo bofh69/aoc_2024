@@ -58,24 +58,32 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
 
 #[aoc(day18, part2)]
 pub fn solve_part2(data: &InputType) -> SolutionType {
-    let mut map = Map::new(WIDTH, WIDTH);
-
-    let mut byte_iter = data.iter();
-    for _time in 0..1024 {
-        let &(x, y) = data.iter().next().unwrap();
-        let pos = Point { x, y };
-        map.set_at(pos, b'#');
-    }
-
     let start = Point { x: 0, y: 0 };
     let end = Point {
         x: WIDTH - 1,
         y: WIDTH - 1,
     };
 
-    while let Some(&(x, y)) = byte_iter.next() {
-        let last_pos = Point { x, y };
-        map.set_at(last_pos, b'#');
+    let mut min_time = 1024;
+    let mut max_time = data.len();
+    loop {
+        let mut map = Map::new(WIDTH, WIDTH);
+
+        if min_time + 1 >= max_time {
+            let (x, y) = data[min_time];
+            println!("Answer: Last byte was at {x},{y}");
+            return min_time as SolutionType;
+        }
+
+        let time = min_time + (max_time - min_time) / 2;
+
+        for (t, &(x, y)) in data.iter().enumerate() {
+            if t >= time {
+                break;
+            }
+            let last_pos = Point { x, y };
+            map.set_at(last_pos, b'#');
+        }
 
         if map.bfs(start, end, &mut |_map, _p, d, c| {
             if d.is_cardinal() && c == b'.' {
@@ -85,9 +93,9 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
             }
         }) == 0
         {
-            println!("Answer: {},{}", last_pos.x, last_pos.y);
-            return 0;
+            max_time = time;
+        } else {
+            min_time = time;
         }
     }
-    0
 }
