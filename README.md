@@ -11,7 +11,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  2024 - 38 ⭐ - Rust
+  2024 - 40 ⭐ - Rust
 </h1>
 <a href="src/day01.rs">
   <img src=".aoc_tiles/tiles/2024/01.png" width="161px">
@@ -69,5 +69,8 @@ SPDX-License-Identifier: GPL-3.0-or-later
 </a>
 <a href="src/day19.rs">
   <img src=".aoc_tiles/tiles/2024/19.png" width="161px">
+</a>
+<a href="src/day20.rs">
+  <img src=".aoc_tiles/tiles/2024/20.png" width="161px">
 </a>
 <!-- AOC TILES END -->
