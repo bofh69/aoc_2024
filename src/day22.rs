@@ -45,7 +45,7 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
 
 #[aoc(day22, part2)]
 pub fn solve_part2(data: &InputType) -> SolutionType {
-    let mut prices = [0; 19*19*19*19];
+    let mut prices = [0; 19 * 19 * 19 * 19];
 
     data.iter().for_each(|&n| {
         let mut n = n;
@@ -62,17 +62,17 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
         let mut price = n % 10;
         idx = idx * 19 + (price - old_price + 9) as usize;
 
-        let mut first = [true; 19*19*19*19];
+        let mut first = [true; 19 * 19 * 19 * 19];
         for _ in 3..2000 {
             n = next(n);
             let old_price = price;
             price = n % 10;
-            idx = (idx * 19 + (price - old_price + 9) as usize) % (19*19*19*19);
+            idx = (idx * 19 + (price - old_price + 9) as usize) % (19 * 19 * 19 * 19);
             if first[idx] {
                 prices[idx] += price;
                 first[idx] = false;
             }
         }
     });
-    prices.iter().map(|n| *n).max().unwrap() as SolutionType
+    prices.iter().copied().max().unwrap() as SolutionType
 }
