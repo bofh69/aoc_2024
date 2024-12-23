@@ -4,7 +4,7 @@
 
 use aoc_runner_derive::{aoc, aoc_generator};
 
-use itertools::*;
+// use itertools::*;
 
 // use advent_of_tools::*;
 use ahash::{HashMap, HashMapExt};
@@ -65,19 +65,10 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
     sets.len() as SolutionType
 }
 
-fn is_cliq(vertices: &Vec<&&str>, edges: &HashSet<(&str, &str)>) -> bool {
-    for pair in vertices.iter().combinations(2) {
-        if !edges.contains(&(pair[0], pair[1])) {
-            return false;
-        }
-    }
-    return true;
-}
-
 #[aoc(day23, part2)]
 pub fn solve_part2(data: &InputType) -> SolutionType {
     let data : Vec<_> = data.iter().map(|s| (&s[0..2], &s[3..5])).collect();
-    let vertices : HashSet<&str> = data.iter().fold(HashSet::new(), |mut l, e| {
+    let vertices = data.iter().fold(HashSet::new(), |mut l, e| {
         l.insert(e.0);
         l.insert(e.1);
         l
@@ -93,46 +84,37 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
         dir_edges.insert((*v1, *v0));
     }
 
-    let mut best = "".to_string();
-    let mut all_in_cliqs = vertices.clone();
-    for i in 3.. {
-        let mut new_all_in_cliqs = HashSet::new();
-        for mut possible_cliq in all_in_cliqs.iter().combinations(i) {
-            if is_cliq(&possible_cliq, &dir_edges) {
-                for &&vert in &possible_cliq {
-                    new_all_in_cliqs.insert(vert);
-                }
-                possible_cliq.sort();
-                best = "".to_string();
-                for (i, s) in possible_cliq.iter().enumerate() {
-                    if i != 0 {
-                        best.push(',');
-                    }
-                    best.push_str(s);
-                }
-                println!("Best so far: {best}");
-            }
+    let mut best_cliq = HashSet::new();
+    for &vert in &vertices {
+        if best_cliq.contains(vert) {
+            continue;
         }
-        if new_all_in_cliqs.len() > 0 {
-            for vert in vertices.clone() {
-                if !new_all_in_cliqs.contains(vert) {
-                    all_in_cliqs.remove(vert);
+        let mut new_cliq = HashSet::new();
+        new_cliq.insert(vert);
+        'vert1: for vert1 in edges.get(&vert).unwrap() {
+            for vert2 in &new_cliq {
+                if vert2 == vert1 {
+                    continue;
+                }
+                if !dir_edges.contains(&(vert1, vert2)) {
+                    continue 'vert1;
                 }
             }
-        } else {
-            break;
+            new_cliq.insert(vert1);
+        }
+        if new_cliq.len() > best_cliq.len() {
+            best_cliq = new_cliq;
         }
     }
-
-    println!("{best:?}");
-
-    /*
-    println!("graph {{");
-    for edge in &data {
-        println!("{} -- {}", edge.0, edge.1);
+    let mut best_cliq : Vec<_> = best_cliq.iter().collect();
+    best_cliq.sort();
+    for (i, s) in best_cliq.iter().enumerate() {
+        if i != 0 {
+            print!(",");
+        }
+        print!("{s}");
     }
-    println!("}}");
-    */
+    println!();
 
     data.len() as SolutionType
 }
