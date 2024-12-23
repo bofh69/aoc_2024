@@ -23,7 +23,7 @@ pub fn input_generator(input: &str) -> InputType {
 #[aoc(day23, part1)]
 pub fn solve_part1(data: &InputType) -> SolutionType {
     // map.get_width() as SolutionType
-    let data : Vec<_> = data.iter().map(|s| (&s[0..2], &s[3..5])).collect();
+    let data: Vec<_> = data.iter().map(|s| (&s[0..2], &s[3..5])).collect();
     let vertices = data.iter().fold(HashSet::new(), |mut l, e| {
         l.insert(e.0);
         l.insert(e.1);
@@ -42,17 +42,16 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
             for vert1 in vert0_edges {
                 if vert1 != vert0 {
                     for vert2 in edges.get(vert1).unwrap() {
-                        if vert2 != vert0 && vert2 != vert1 {
-                            if edges.get(vert2).unwrap().contains(vert0) {
-                                if ! sets.contains(&(vert0, vert2, vert1)) &&
-                                   ! sets.contains(&(vert1, vert0, vert2)) &&
-                                   ! sets.contains(&(vert1, vert2, vert0)) &&
-                                   ! sets.contains(&(vert2, vert0, vert1)) &&
-                                   ! sets.contains(&(vert2, vert1, vert0)) {
-                                    sets.insert((vert0, vert1, vert2));
-                                    // println!("Maybe {vert0} {vert1} {vert2}");
-                                }
-                            }
+                        if vert2 != vert0
+                            && vert2 != vert1
+                            && edges.get(vert2).unwrap().contains(vert0)
+                            && !sets.contains(&(vert0, vert2, vert1))
+                            && !sets.contains(&(vert1, vert0, vert2))
+                            && !sets.contains(&(vert1, vert2, vert0))
+                            && !sets.contains(&(vert2, vert0, vert1))
+                            && !sets.contains(&(vert2, vert1, vert0))
+                        {
+                            sets.insert((vert0, vert1, vert2));
                         }
                     }
                 }
@@ -60,14 +59,12 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
         }
     }
 
-    // println!("{sets:?}");
-   
     sets.len() as SolutionType
 }
 
 #[aoc(day23, part2)]
-pub fn solve_part2(data: &InputType) -> SolutionType {
-    let data : Vec<_> = data.iter().map(|s| (&s[0..2], &s[3..5])).collect();
+pub fn solve_part2(data: &InputType) -> String {
+    let data: Vec<_> = data.iter().map(|s| (&s[0..2], &s[3..5])).collect();
     let vertices = data.iter().fold(HashSet::new(), |mut l, e| {
         l.insert(e.0);
         l.insert(e.1);
@@ -84,13 +81,13 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
         dir_edges.insert((*v1, *v0));
     }
 
-    let mut best_cliq = HashSet::new();
+    let mut best_cliq = Vec::new();
     for &vert in &vertices {
-        if best_cliq.contains(vert) {
+        if best_cliq.contains(&vert) {
             continue;
         }
-        let mut new_cliq = HashSet::new();
-        new_cliq.insert(vert);
+        let mut new_cliq = Vec::new();
+        new_cliq.push(vert);
         'vert1: for vert1 in edges.get(&vert).unwrap() {
             for vert2 in &new_cliq {
                 if vert2 == vert1 {
@@ -100,21 +97,21 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
                     continue 'vert1;
                 }
             }
-            new_cliq.insert(vert1);
+            new_cliq.push(vert1);
         }
         if new_cliq.len() > best_cliq.len() {
             best_cliq = new_cliq;
         }
     }
-    let mut best_cliq : Vec<_> = best_cliq.iter().collect();
+    let mut best_cliq: Vec<_> = best_cliq.iter().collect();
     best_cliq.sort();
+    let mut result = "".to_string();
     for (i, s) in best_cliq.iter().enumerate() {
         if i != 0 {
-            print!(",");
+            result.push(',');
         }
-        print!("{s}");
+        result.push_str(s);
     }
-    println!();
 
-    data.len() as SolutionType
+    result
 }
