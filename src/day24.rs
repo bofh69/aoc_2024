@@ -8,9 +8,9 @@ use ahash::{HashMap, HashMapExt};
 
 #[derive(Debug)]
 pub enum Operator {
-    AND(String, String),
-    OR(String, String),
-    XOR(String, String),
+    And(String, String),
+    Or(String, String),
+    Xor(String, String),
 }
 
 type InputType = (HashMap<String, bool>, Vec<(Operator, String)>);
@@ -21,68 +21,65 @@ pub fn input_generator(input: &str) -> InputType {
     let mut iter = input.lines();
     let mut result1 = HashMap::new();
     let mut result2 = Vec::new();
-    while let Some(line) = iter.next() {
-        if line == "" {
+    for line in iter.by_ref() {
+        if line.is_empty() {
             break;
         }
         let reg = line[0..3].to_string();
         let val = &line[5..6] == "1";
         result1.insert(reg, val);
     }
-    
-    while let Some(line) = iter.next() {
-        let line : Vec<_> = line.split(" ").collect();
+
+    for line in iter {
+        let line: Vec<_> = line.split(" ").collect();
         let op = match line[1] {
-            "AND" => Operator::AND(line[0].to_string(), line[2].to_string()),
-            "OR" => Operator::OR(line[0].to_string(), line[2].to_string()),
-            "XOR" => Operator::XOR(line[0].to_string(), line[2].to_string()),
+            "AND" => Operator::And(line[0].to_string(), line[2].to_string()),
+            "OR" => Operator::Or(line[0].to_string(), line[2].to_string()),
+            "XOR" => Operator::Xor(line[0].to_string(), line[2].to_string()),
             _ => panic!("Unknown operator"),
         };
         result2.push((op, line[4].to_string()));
-
     }
     (result1, result2)
 }
 
-fn calc(regs: &mut HashMap<String, bool>, ops: &[(Operator, String)])
-{
+fn calc(regs: &mut HashMap<String, bool>, ops: &[(Operator, String)]) {
     loop {
         let mut found_any = false;
-        println!("Loop");
         for (op, result) in ops.iter() {
             if !regs.contains_key(result) {
                 let res = match op {
-                    Operator::AND(a, b) => {
-                        if let Some(&val) = regs.get(a) {
-                            if !val {
+                    Operator::And(a, b) => {
+                        if let Some(&av) = regs.get(a) {
+                            if !av {
                                 Some(false)
-                            } else if let Some(&val) = regs.get(b) {
-                                Some(val)
+                            } else if let Some(&bv) = regs.get(b) {
+                                Some(av && bv)
                             } else {
                                 None
                             }
+                        } else if Some(&false) == regs.get(b) {
+                            Some(false)
                         } else {
                             None
                         }
                     }
-                    Operator::OR(a, b) => {
-                        if let Some(&val) = regs.get(a) {
-                            if val {
+                    Operator::Or(a, b) => {
+                        if let Some(&av) = regs.get(a) {
+                            if av {
                                 Some(true)
-                            } else if let Some(&val) = regs.get(b) {
-                                Some(val)
-                            } else {
-                                None
-                            }
-                        } else {
-                            if let Some(&bv) = regs.get(b) {
+                            } else if let Some(&bv) = regs.get(b) {
                                 Some(bv)
                             } else {
                                 None
                             }
+                        } else if Some(&true) == regs.get(b) {
+                            Some(true)
+                        } else {
+                            None
                         }
                     }
-                    Operator::XOR(a, b) => {
+                    Operator::Xor(a, b) => {
                         if let Some(&av) = regs.get(a) {
                             if let Some(&bv) = regs.get(b) {
                                 Some(av != bv)
@@ -95,11 +92,8 @@ fn calc(regs: &mut HashMap<String, bool>, ops: &[(Operator, String)])
                     }
                 };
                 if let Some(val) = res {
-                    println!("{op:?} == {result} == {val}");
                     regs.insert(result.to_string(), val);
                     found_any = true;
-                } else {
-                    println!("Couldn't assign {result} from {op:?}");
                 }
             }
         }
@@ -120,7 +114,6 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
                 result |= 1 << i;
             }
         } else {
-            println!("No z{i:02}");
             break;
         }
     }
