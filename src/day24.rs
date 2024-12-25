@@ -6,7 +6,7 @@ use aoc_runner_derive::{aoc, aoc_generator};
 
 use ahash::{HashMap, HashMapExt};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Operator {
     And(String, String),
     Or(String, String),
@@ -120,7 +120,184 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
     result
 }
 
+#[allow(dead_code)]
+fn find_deps<'a>(reg: &'a str, deps: &mut Vec<&'a str>, ops: &'a Vec<(Operator, String)>) {
+    if deps.contains(&reg) {
+        return;
+    }
+    for (op, dest) in ops {
+        if dest == reg {
+            let op = match op {
+                Operator::And(a, b) => (a, b),
+                Operator::Or(a, b) => (a, b),
+                Operator::Xor(a, b) => (a, b),
+            };
+            if !op.0.starts_with('x') && !op.0.starts_with('y') {
+                find_deps(op.0, deps, ops);
+            }
+            if !deps.contains(&op.0.as_str()) {
+                deps.push(op.0);
+            }
+            if !op.1.starts_with('x') && !op.1.starts_with('y') {
+                find_deps(op.1, deps, ops);
+            }
+            if !deps.contains(&op.1.as_str()) {
+                deps.push(op.1);
+            }
+        }
+    }
+}
+
+#[allow(dead_code)]
+fn find_ops_for_reg<'a>(reg: &'a str, result: &mut Vec<usize>, ops: &'a Vec<(Operator, String)>) {
+    for (i, (op, dest)) in ops.iter().enumerate() {
+        if dest == reg {
+            if result.contains(&i) {
+                return;
+            }
+            result.push(i);
+            let op = match op {
+                Operator::And(a, b) => (a, b),
+                Operator::Or(a, b) => (a, b),
+                Operator::Xor(a, b) => (a, b),
+            };
+            if !op.0.starts_with('x') && !op.0.starts_with('y') {
+                find_ops_for_reg(op.0, result, ops);
+            }
+            if !op.1.starts_with('x') && !op.1.starts_with('y') {
+                find_ops_for_reg(op.1, result, ops);
+            }
+        }
+    }
+}
+
+fn add(x: u64, y: u64, ops: &[(Operator, String)]) -> u64 {
+    let mut regs = HashMap::new();
+    for i in 0..45 {
+        regs.insert(format!("x{:02}", i), x & (1 << i) != 0);
+        regs.insert(format!("y{:02}", i), y & (1 << i) != 0);
+    }
+    calc(&mut regs, ops);
+    let mut result = 0;
+    for i in 0..64 {
+        if let Some(&val) = regs.get(&format!("z{i:02}")) {
+            if val {
+                result |= 1 << i;
+            }
+        } else {
+            break;
+        }
+    }
+    result
+}
+
+fn is_ok_for(i: usize, ops: &[(Operator, String)]) -> bool {
+    if add(0, 0, ops) != 0 {
+        return false;
+    }
+    if i < 45 {
+        let x = 1 << i;
+        if add(x, 0, ops) != x || add(0, x, ops) != x {
+            return false;
+        }
+        if add(x, 1, ops) != (x + 1) || add(1, x, ops) != (x + 1) {
+            return false;
+        }
+    }
+    if i > 0 {
+        let x = (1 << i) - 1;
+        if add(x, x, ops) != x * 2 {
+            return false;
+        }
+        let x = 1 << i;
+        let y = 1 << (i - 1);
+        if add(x, y, ops) != x + y {
+            return false;
+        }
+        if add(y, x, ops) != x + y {
+            return false;
+        }
+    }
+    true
+}
+
+fn fix_from(from: usize, ops: &mut Vec<(Operator, String)>) -> Option<Vec<String>> {
+    let mut tmp = "".to_string();
+    for i in from..45 {
+        if !is_ok_for(i, ops) {
+            if i <= from {
+                return None;
+            }
+            for first_idx in 0..ops.len() {
+                'second_idx: for second_idx in first_idx + 1..ops.len() {
+                    use std::mem::swap;
+                    let a = ops[first_idx].1.clone();
+                    let b = ops[second_idx].1.clone();
+                    swap(&mut ops[first_idx].1, &mut tmp);
+                    swap(&mut ops[second_idx].1, &mut tmp);
+                    swap(&mut ops[first_idx].1, &mut tmp);
+                    for j in 0..=i {
+                        let j = i - j;
+                        if !is_ok_for(j, ops) {
+                            swap(&mut ops[first_idx].1, &mut tmp);
+                            swap(&mut ops[second_idx].1, &mut tmp);
+                            swap(&mut ops[first_idx].1, &mut tmp);
+                            continue 'second_idx;
+                        }
+                    }
+                    if let Some(mut result) = fix_from(i + 1, ops) {
+                        result.push(a);
+                        result.push(b);
+                        return Some(result);
+                    }
+                    swap(&mut ops[first_idx].1, &mut tmp);
+                    swap(&mut ops[second_idx].1, &mut tmp);
+                    swap(&mut ops[first_idx].1, &mut tmp);
+                }
+            }
+            return None;
+        }
+    }
+    if add(0, 0, ops) != 0 {
+        return None;
+    }
+    for i in 0..44 {
+        let x = 1 << i;
+        if add(x, 0, ops) != x || add(0, x, ops) != x {
+            return None;
+        }
+        if add(x, x, ops) != 2 * x {
+            return None;
+        }
+        let x = ((1 << 45) - 1) ^ (1 << i);
+        if add(x, 0, ops) != x || add(0, x, ops) != x {
+            return None;
+        }
+        if add(x, x, ops) != 2 * x {
+            return None;
+        }
+    }
+    let x = (1 << 45) - 1;
+    if add(x, 0, ops) != x || add(0, x, ops) != x {
+        return None;
+    }
+    if add(x, 1, ops) != (x + 1) || add(1, x, ops) != (x + 1) {
+        return None;
+    }
+    if add(x, x, ops) != 2 * x {
+        return None;
+    }
+
+    Some(vec![])
+}
+
 #[aoc(day24, part2)]
-pub fn solve_part2(data: &InputType) -> SolutionType {
-    data.1.len() as SolutionType
+pub fn solve_part2(data: &InputType) -> String {
+    let mut ops = data.1.clone();
+    if let Some(mut result) = fix_from(0, &mut ops) {
+        result.sort();
+        format!("{}", result.join(","))
+    } else {
+        panic!("Didn't find an answer!");
+    }
 }
