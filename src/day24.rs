@@ -296,7 +296,7 @@ pub fn solve_part2(data: &InputType) -> String {
     let mut ops = data.1.clone();
     if let Some(mut result) = fix_from(0, &mut ops) {
         result.sort();
-        format!("{}", result.join(","))
+        result.join(",").to_string()
     } else {
         panic!("Didn't find an answer!");
     }
