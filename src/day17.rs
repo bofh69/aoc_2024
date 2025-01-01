@@ -57,20 +57,16 @@ pub fn input_generator(input: &str) -> InputType {
 }
 
 #[aoc(day17, part1)]
-pub fn solve_part1(data: &InputType) -> SolutionType {
+pub fn solve_part1(data: &InputType) -> String {
     let a = data.a;
     let result = run_prog(a, 0, 0, &data.prog);
-    println!(
-        "{}",
-        result.iter().fold(String::new(), |mut acc, v| {
-            if !acc.is_empty() {
-                acc.push(',');
-            }
-            acc.push_str(&format!("{v}"));
-            acc
-        })
-    );
-    0
+    result.iter().fold(String::new(), |mut acc, v| {
+        if !acc.is_empty() {
+            acc.push(',');
+        }
+        acc.push_str(&format!("{v}"));
+        acc
+    })
 }
 
 use memoize::*;

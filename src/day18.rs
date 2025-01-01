@@ -37,7 +37,6 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
             map.set_at(pos, b'#');
         }
     }
-    map.print();
     let start = Point { x: 0, y: 0 };
     let end = Point {
         x: WIDTH - 1,
@@ -57,7 +56,7 @@ pub fn solve_part1(data: &InputType) -> SolutionType {
 ///////////////////////////////////
 
 #[aoc(day18, part2)]
-pub fn solve_part2(data: &InputType) -> SolutionType {
+pub fn solve_part2(data: &InputType) -> String {
     let start = Point { x: 0, y: 0 };
     let end = Point {
         x: WIDTH - 1,
@@ -71,8 +70,7 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
 
         if min_time + 1 >= max_time {
             let (x, y) = data[min_time];
-            println!("Answer: Last byte was at {x},{y}");
-            return min_time as SolutionType;
+            return format!("{x},{y}");
         }
 
         let time = min_time + (max_time - min_time) / 2;
