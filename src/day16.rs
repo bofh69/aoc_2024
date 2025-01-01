@@ -10,7 +10,7 @@ use std::collections::BTreeSet;
 
 use advent_of_tools::*;
 
-type SolutionType = u32;
+type SolutionType = i32;
 
 #[aoc_generator(day16)]
 pub fn input_generator(input: &str) -> Map {
@@ -232,7 +232,7 @@ pub fn solve_part2(map: &Map) -> SolutionType {
         cost: 0,
     });
 
-    let mut max_cost = u32::MAX;
+    let mut max_cost = i32::MAX;
 
     while let Some(pos) = to_expand.pop_first() {
         if pos.cost > max_cost {
