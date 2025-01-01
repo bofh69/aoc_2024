@@ -70,7 +70,7 @@ fn find_steps_from(map: &Map, from: Point) -> Vec<StepType> {
             && pos.x < map.get_width()
             && pos.y < map.get_height()
         {
-            let mut cheapest = StepType::MAX;
+            let mut cheapest = StepType::MAX / 2;
             for (p, d, c) in map.neighbors(pos) {
                 if !d.is_cardinal() {
                     continue;
