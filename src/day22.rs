@@ -27,7 +27,7 @@ pub fn input_generator(input: &str) -> InputType {
 fn next(n: NumType) -> NumType {
     let n1 = ((n * 64) ^ n) & ((1 << 24) - 1);
     let n2 = ((n1 / 32) ^ n1) & ((1 << 24) - 1);
-    ((n2 * 2048) ^ n2) & ((1 << 24) - 1)
+    ((n2.overflowing_mul(2048)).0 ^ n2) & ((1 << 24) - 1)
 }
 
 #[aoc(day22, part1)]
@@ -53,22 +53,22 @@ pub fn solve_part2(data: &InputType) -> SolutionType {
         n = next(n);
         let price = n % 10;
         let mut old_nums = [0u8; 4];
-        old_nums[2] = (price - old_price + 9) as u8;
+        old_nums[2] = (price + 9 - old_price) as u8;
         n = next(n);
         let old_price = price;
         let price = n % 10;
-        old_nums[1] = (price - old_price + 9) as u8;
+        old_nums[1] = (price + 9 - old_price) as u8;
         n = next(n);
         let old_price = price;
         let mut price = n % 10;
-        old_nums[0] = (price - old_price + 9) as u8;
+        old_nums[0] = (price + 9 - old_price) as u8;
 
         let mut first = [true; 19 * 19 * 19 * 19];
         for _ in 3..2000 {
             n = next(n);
             let old_price = price;
             price = n % 10;
-            let diff = (price - old_price + 9) as u8;
+            let diff = (price + 9 - old_price) as u8;
             let idx = old_nums[2] as usize * 19 * 19 * 19
                 + old_nums[1] as usize * 19 * 19
                 + old_nums[0] as usize * 19
